@@ -21,7 +21,6 @@ public func configure(_ app: Application) throws {
         database: database
     ), as: .psql)
 
-//    app.migrations.add(CreateTodo())
     app.migrations.add(CreateUsers())
     app.migrations.add(CreateTokens())
     app.migrations.add(CreateUserDetail())
