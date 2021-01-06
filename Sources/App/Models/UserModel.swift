@@ -21,6 +21,7 @@ final class User: Model {
     @ID(key: "id") var id: UUID?
     @Field(key: "email") var email: String
     @Field(key: "password_hash") var passwordHash: String
+    @Children(for: \.$user) var userDetails: [UserDetailsModel]
     @Timestamp(key: "created_at", on: .create) var createdAt: Date?
     @Timestamp(key: "updated_at", on: .update) var updatedAt: Date?
   

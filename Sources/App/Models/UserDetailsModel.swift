@@ -1,5 +1,5 @@
 //
-//  UserDetails.swift
+//  UserDetailsModel.swift
 //  
 //
 //  Created by James Furlong on 7/1/21.
@@ -8,7 +8,7 @@
 import Fluent
 import Vapor
 
-final class UserDetails: Model {
+final class UserDetailsModel: Model {
     struct Public: Content {
         let id: UUID
         let user: User
@@ -21,7 +21,7 @@ final class UserDetails: Model {
     
     static let schema = "userDetails"
     
-    @ID() var id: UUID
+    @ID(custom: "id", generatedBy: .user) var id: String?
     @Parent(key: "user_id") var user: User
     @Field(key: "first_name") var firstName: String
     @Field(key: "last_name") var lastName: String
@@ -32,7 +32,7 @@ final class UserDetails: Model {
     init() { }
     
     init(
-        id: UUID = nil,
+        id: String? = nil,
         userId: User.IDValue,
         firstName: String,
         lastName: String,
@@ -43,5 +43,16 @@ final class UserDetails: Model {
         self.firstName = firstName
         self.lastName = lastName
         self.dob = dob
+    }
+}
+
+extension UserDetailsModel {
+    static func create(from userDetails: UserDetails, userId: UUID) throws -> UserDetailsModel {
+        UserDetailsModel(
+            userId: userId,
+            firstName: userDetails.firstName,
+            lastName: userDetails.lastName,
+            dob: userDetails.dob
+        )
     }
 }

@@ -8,46 +8,27 @@
 import Vapor
 import Fluent
 
-struct UserSignup: Content {
-  let email: String
-  let password: String
-}
-
-struct UserLogout: Content {
-    let token: String
-}
-
-struct NewSession: Content {
-    let token: String
-    let user: User.Public
-}
-
-extension UserSignup: Validatable {
-    static func validations(_ validations: inout Validations) {
-        validations.add("email", as: String.self, is: !.empty)
-        validations.add("password", as: String.self, is: .count(6...))
-    }
-}
-
-extension UserLogout: Validatable {
-    static func validations(_ validations: inout Validations) {
-        validations.add("token", as: String.self, is: !.empty)
-    }
-}
-
 struct UserController: RouteCollection {
+    
+    // MARK: - Routes
     func boot(routes: RoutesBuilder) throws {
+        // Unprotected routes
         let usersRoute = routes.grouped("users")
         usersRoute.post("signup", use: create)
+        usersRoute.post("logout", use: logout)
         
+        // User Auth protected routes
         let tokenProtected = usersRoute.grouped(Token.authenticator())
         tokenProtected.get("me", use: getMyOwnUser)
+        tokenProtected.put("details", use: putDetails)
+        tokenProtected.get("details", use: getDetails)
         
+        // Password protected routes
         let passwordProtected = usersRoute.grouped(User.authenticator())
         passwordProtected.post("login", use: login)
-        passwordProtected.post("logout", use: logout)
     }
 
+    // MARK: - Views
     fileprivate func create(req: Request) throws -> EventLoopFuture<NewSession> {
         try UserSignup.validate(content: req)
         let userSignup = try req.content.decode(UserSignup.self)
@@ -86,14 +67,43 @@ struct UserController: RouteCollection {
     
     fileprivate func logout(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         try UserLogout.validate(content: req)
-        let logoutInto = try req.content.decode(UserLogout.self)
+        let logoutInfo = try req.content.decode(UserLogout.self)
         
         return Token.query(on: req.db)
-            .filter(\.$value == logoutInto.token)
+            .filter(\.$value == logoutInfo.token)
             .first()
             .unwrap(or: Abort(.notFound))
             .flatMap { $0.delete(on: req.db) }
             .transform(to: .ok)
+    }
+    
+    fileprivate func putDetails(req: Request) throws -> EventLoopFuture<UserDetails> {
+        let user = try req.auth.require(User.self)
+        try UserDetails.validate(content: req)
+        let userDetails = try req.content.decode(UserDetails.self)
+        let details = try UserDetailsModel.create(from: userDetails, userId: user.id!)
+        
+        return details
+            .save(on: req.db)
+            .flatMapThrowing {
+                UserDetails(firstName: details.firstName, lastName: details.lastName, dob: details.dob)
+            }
+    }
+    
+    fileprivate func getDetails(req: Request) throws -> EventLoopFuture<[UserDetails]> {
+        return UserDetailsModel.query(on: req.db)
+            .with(\.$user)
+            .all()
+            .flatMapThrowing { details in
+                details
+                    .map { detail in
+                        UserDetails(
+                            firstName: detail.firstName,
+                            lastName: detail.lastName,
+                            dob: detail.dob
+                        )
+                    }
+            }
     }
 
     func getMyOwnUser(req: Request) throws -> User.Public {
