@@ -49,6 +49,15 @@ extension User {
                          expiresAt: expiryDate
         )
     }
+    
+    func createUserDetails(details: UserDetails, user: User) throws -> UserDetailsModel {
+        return try UserDetailsModel(
+            user: user,
+            firstName: details.firstName,
+            lastName: details.lastName,
+            dob: details.dob
+        )
+    }
 
     func asPublic() throws -> Public {
         Public(email: email,

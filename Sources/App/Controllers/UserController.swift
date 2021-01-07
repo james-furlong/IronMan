@@ -20,8 +20,9 @@ struct UserController: RouteCollection {
         // User Auth protected routes
         let tokenProtected = usersRoute.grouped(Token.authenticator())
         tokenProtected.get("me", use: getMyOwnUser)
-        tokenProtected.put("details", use: putDetails)
+        tokenProtected.post("details", use: postDetails)
         tokenProtected.get("details", use: getDetails)
+        tokenProtected.patch("details", use: updateDetails)
         
         // Password protected routes
         let passwordProtected = usersRoute.grouped(User.authenticator())
@@ -77,20 +78,28 @@ struct UserController: RouteCollection {
             .transform(to: .ok)
     }
     
-    fileprivate func putDetails(req: Request) throws -> EventLoopFuture<UserDetails> {
+    fileprivate func postDetails(req: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
         let user = try req.auth.require(User.self)
         try UserDetails.validate(content: req)
-        let userDetails = try req.content.decode(UserDetails.self)
-        let details = try UserDetailsModel.create(from: userDetails, userId: user.id!)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .none
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(formatter)
+        let userDetails = try req.content.decode(UserDetails.self, using: decoder)
         
-        return details
-            .save(on: req.db)
-            .flatMapThrowing {
-                UserDetails(firstName: details.firstName, lastName: details.lastName, dob: details.dob)
-            }
+        return UserDetailsModel(
+            user: user,
+            firstName: userDetails.firstName,
+            lastName: userDetails.lastName,
+            dob: userDetails.dob
+        )
+        .create(on: req.db)
+        .transform(to: .ok)
     }
     
     fileprivate func getDetails(req: Request) throws -> EventLoopFuture<[UserDetails]> {
+        let _ = try req.auth.require(User.self)
         return UserDetailsModel.query(on: req.db)
             .with(\.$user)
             .all()
@@ -105,14 +114,29 @@ struct UserController: RouteCollection {
                     }
             }
     }
+    
+    fileprivate func updateDetails(req: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+        
+    }
 
     func getMyOwnUser(req: Request) throws -> User.Public {
         try req.auth.require(User.self).asPublic()
     }
 
+    //MARK: - Internal functions
+    
     private func checkIfUserExists(_ email: String, req: Request) -> EventLoopFuture<Bool> {
         User.query(on: req.db)
             .filter(\.$email == email)
+            .first()
+            .map { $0 != nil }
+    }
+    
+    private func checkIfUserDetailExists(_ details: UserDetails, req: Request) -> EventLoopFuture<Bool> {
+        UserDetailsModel.query(on: req.db)
+            .filter(\.$firstName == details.firstName)
+            .filter(\.$lastName == details.lastName)
+            .filter(\.$dob == details.dob)
             .first()
             .map { $0 != nil }
     }

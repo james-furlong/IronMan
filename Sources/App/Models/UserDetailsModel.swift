@@ -21,7 +21,7 @@ final class UserDetailsModel: Model {
     
     static let schema = "userDetails"
     
-    @ID(custom: "id", generatedBy: .user) var id: String?
+    @ID(key: "id") var id: UUID?
     @Parent(key: "user_id") var user: User
     @Field(key: "first_name") var firstName: String
     @Field(key: "last_name") var lastName: String
@@ -32,14 +32,14 @@ final class UserDetailsModel: Model {
     init() { }
     
     init(
-        id: String? = nil,
-        userId: User.IDValue,
+        id: UUID? = nil,
+        user: User,
         firstName: String,
         lastName: String,
         dob: Date
     ) {
         self.id = id
-        self.$user.id = userId
+        self.$user.id = user.id!
         self.firstName = firstName
         self.lastName = lastName
         self.dob = dob
@@ -47,9 +47,9 @@ final class UserDetailsModel: Model {
 }
 
 extension UserDetailsModel {
-    static func create(from userDetails: UserDetails, userId: UUID) throws -> UserDetailsModel {
-        UserDetailsModel(
-            userId: userId,
+    static func create(from userDetails: UserDetails, user: User) throws -> UserDetailsModel {
+        return UserDetailsModel(
+            user: user,
             firstName: userDetails.firstName,
             lastName: userDetails.lastName,
             dob: userDetails.dob

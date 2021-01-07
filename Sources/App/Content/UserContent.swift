@@ -30,7 +30,7 @@ struct NewSession: Content {
 
 extension UserSignup: Validatable {
     static func validations(_ validations: inout Validations) {
-        validations.add("email", as: String.self, is: !.empty)
+        validations.add("email", as: String.self, is: .email)
         validations.add("password", as: String.self, is: .count(6...))
     }
 }
@@ -39,7 +39,7 @@ extension UserDetails: Validatable {
     static func validations(_ validations: inout Validations) {
         validations.add("firstName", as: String.self, is: !.empty)
         validations.add("lastName", as: String.self, is: !.empty)
-        validations.add("dob", as: Date.self, is: .valid)
+        validations.add("dob", as: String.self, is: !.empty)
     }
 }
 

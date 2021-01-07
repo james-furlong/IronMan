@@ -11,8 +11,7 @@ struct CreateUserDetail: Migration {
     func prepare(on database: Database) -> EventLoopFuture<Void> {
         database.schema(UserDetailsModel.schema)
             .id()
-            .field("user_id", .uuid, .references("users", "id"))
-            .unique(on: "user_id")
+            .field("user_id", .uuid, .required, .references("users", "id"))
             .field("first_name", .string, .required)
             .field("last_name", .string, .required)
             .field("dob", .date, .required)
