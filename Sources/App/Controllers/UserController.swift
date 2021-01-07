@@ -116,7 +116,26 @@ struct UserController: RouteCollection {
     }
     
     fileprivate func updateDetails(req: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+        let user = try req.auth.require(User.self)
+        try UserDetails.validate(content: req)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .none
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(formatter)
+        let userDetails = try req.content.decode(UserDetails.self, using: decoder)
         
+        return UserDetailsModel.query(on: req.db)
+            .filter(\.$user.$id == user.id!)
+            .first()
+            .flatMapThrowing{ p in
+                p?.firstName = userDetails.firstName
+                p?.lastName = userDetails.lastName
+                p?.dob = userDetails.dob
+                
+                let _ = p?.update(on: req.db)
+            }
+            .transform(to: .ok)
     }
 
     func getMyOwnUser(req: Request) throws -> User.Public {

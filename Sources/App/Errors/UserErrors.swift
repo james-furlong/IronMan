@@ -10,6 +10,7 @@ import Vapor
 enum UserError {
     case usernameTaken
     case userDetailRegistered
+    case noUserDetailsRegistered
 }
 
 extension UserError: AbortError {
@@ -21,6 +22,7 @@ extension UserError: AbortError {
         switch self {
             case .usernameTaken: return .conflict
             case .userDetailRegistered: return .conflict
+            case .noUserDetailsRegistered: return .conflict
         }
     }
 
@@ -28,6 +30,7 @@ extension UserError: AbortError {
         switch self {
             case .usernameTaken: return "Username already taken"
             case .userDetailRegistered: return "User details already registered"
+            case .noUserDetailsRegistered: return "No user details have been registered"
         }
     }
 }
