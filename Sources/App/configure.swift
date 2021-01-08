@@ -1,6 +1,7 @@
 import Fluent
 import FluentPostgresDriver
 import Vapor
+import WebKit
 
 // configures your application
 public func configure(_ app: Application) throws {
@@ -28,6 +29,33 @@ public func configure(_ app: Application) throws {
     app.logger.logLevel = .debug
     
     try app.autoMigrate().wait()
+    
+    var jsonText: String?
+    let url = URL(string: "https://www.melbournestorm.com.au/teams/")
+    let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
+        let rawData = String(data: data!, encoding: String.Encoding.utf8)
+        if let startRange = rawData?.range(of: "profileGroups") {
+            let startText = rawData?.substring(from: startRange.lowerBound)
+            let rangeText = """
+            \"\r\n
+            """
+            if let endRange = startText?.range(of:rangeText) {
+                jsonText = startText?.substring(to: endRange.lowerBound)
+                let json1 = jsonText?.replacingOccurrences(
+                    of: "&quot;",
+                    with: "\""
+                )
+                let json2 = json1?.replacingOccurrences(of: "\"", with: "")
+//                let temp = json1?.firstIndex(of: "\"")
+//                json1?.remove(at: temp!)
+                
+                print(json2)
+            }
+        }
+        
+//        rawData?.spl
+    }
+    task.resume()
 
     // register routes
     try routes(app)
