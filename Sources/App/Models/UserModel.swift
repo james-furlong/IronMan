@@ -10,8 +10,8 @@ import Vapor
 
 final class User: Model {
     struct Public: Content {
-        let email: String
         let id: UUID
+        let email: String
         let createdAt: Date?
         let updatedAt: Date?
     }
@@ -60,8 +60,8 @@ extension User {
     }
 
     func asPublic() throws -> Public {
-        Public(email: email,
-               id: try requireID(),
+        Public(id: try requireID(),
+               email: email,
                createdAt: createdAt,
                updatedAt: updatedAt)
     }
