@@ -1,0 +1,12 @@
+
+• Determine and implement good way of clearing db of all data after each test (similar to beforeEach and afterEach??)
+• Alternatively, set up db to delete DB after testing and create a new one (https://stackoverflow.com/a/62243321/6256655)
+• Setup initial tests for adding a player
+
+• Players needs to:
+    • Add initial value data (algorithm)
+    
+
+NOTES for players:
+
+

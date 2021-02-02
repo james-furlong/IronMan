@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum NRLTeam: String, Codable {
+enum NRLTeamEnum: String, Codable {
     case brisbaneBronos
     case canberraRaiders
     case canterburyBankstownBulldogs
