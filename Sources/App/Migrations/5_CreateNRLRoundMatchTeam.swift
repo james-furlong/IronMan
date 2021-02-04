@@ -67,9 +67,9 @@ struct CreateNRLRoundMatchTeam: Migration {
     
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.eventLoop.flatten([
-            database.schema(NRLRound.schema).delete(),
-            database.schema(NRLMatch.schema).delete(),
             database.schema(NRLTeam.schema).delete(),
+            database.schema(NRLMatch.schema).delete(),
+            database.schema(NRLRound.schema).delete(),
             database.enum(NRLMatchMode.name.description).delete(),
             database.enum(NRLMatchTeam.name.description).delete(),
             database.enum(NRLMatchState.name.description).delete()

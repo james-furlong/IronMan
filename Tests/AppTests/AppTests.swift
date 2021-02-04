@@ -2,7 +2,7 @@
 import XCTVapor
 
 final class AppTests: XCTestCase {
-    func testHelloWorld() throws {
+    func testAdminNrlPlayerRegistration() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
         try configure(app)
@@ -25,7 +25,9 @@ final class AppTests: XCTestCase {
         try app.test(.POST, "/players/nrl/", beforeRequest: { req in
             try req.content.encode(request)
         }, afterResponse: { response in
-            XCTAssertEqual(response.status, .ok)
+            XCTAssertEqual(response.status, .created)
         })
     }
+    
+    
 }

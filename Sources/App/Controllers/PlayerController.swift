@@ -30,15 +30,15 @@ struct PlayerController: RouteCollection {
             .players
             .compactMap { $0.save(on: req.db) }
             .flatten(on: req.eventLoop)
-            .map { HTTPStatus.ok }
+            .map { HTTPStatus.created }
     }
     
     // MARK: - Internal functions
-    private func checkIfPlayerExists(_ player: NRLPlayer, req: Request) -> EventLoopFuture<Bool> {
-        NRLPlayer.query(on: req.db)
-            .filter(\.$lastName == player.lastName)
-            .filter(\.$firstName == player.firstName)
-            .first()
-            .map { $0 != nil }
-    }
+//    private func checkIfPlayerExists(_ player: NRLPlayer, req: Request) -> EventLoopFuture<Bool> {
+//        NRLPlayer.query(on: req.db)
+//            .filter(\.$lastName == player.lastName)
+//            .filter(\.$firstName == player.firstName)
+//            .first()
+//            .map { $0 != nil }
+//    }
 }

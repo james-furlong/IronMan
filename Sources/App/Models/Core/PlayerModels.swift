@@ -26,7 +26,7 @@ final class NRLPlayer: Model, Content {
     @ID(key: "id") var id: UUID?
     @Field(key: "first_name") var firstName: String
     @Field(key: "last_name") var lastName: String
-    @Field(key: "number") var number: Int
+    @Field(key: "player_number") var number: Int
     @Enum(key: "preferred_position") var preferredPosition: NRLPosition
     @Enum(key: "actual_position") var actualPosition: NRLPosition
     @Field(key: "current_value") var value: Int

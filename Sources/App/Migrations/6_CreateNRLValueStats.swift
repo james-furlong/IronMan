@@ -85,8 +85,8 @@ struct CreateNRLValueStat: Migration {
     
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.eventLoop.flatten([
-            database.schema(NRLValue.schema).delete(),
-            database.schema(NRLStat.schema).delete()
+            database.schema(NRLStat.schema).delete(),
+            database.schema(NRLValue.schema).delete()
         ])
     }
     
