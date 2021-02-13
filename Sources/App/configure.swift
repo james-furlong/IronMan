@@ -50,7 +50,6 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateNRLPlayer())
     app.migrations.add(CreateNRLRoundMatchTeam())
     app.migrations.add(CreateNRLValueStat())
-//    var commandConfig = CommandConfig.default()
     
     app.logger.logLevel = .debug
     

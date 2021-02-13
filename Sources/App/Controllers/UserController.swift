@@ -36,23 +36,24 @@ struct UserController: RouteCollection {
         let user = try User.create(from: userSignup)
         var token: Token!
 
-        return checkIfUserExists(userSignup.email, req: req).flatMap { exists in
-            guard !exists else {
-                return req.eventLoop.future(error: UserError.usernameTaken)
-            }
+        return checkIfUserExists(userSignup.email, req: req)
+            .flatMap { exists in
+                guard !exists else {
+                    return req.eventLoop.future(error: UserError.usernameTaken)
+                }
 
-            return user.save(on: req.db)
-        }
-        .flatMap {
-            guard let newToken = try? user.createToken(source: .signup) else {
-                return req.eventLoop.future(error: Abort(.internalServerError))
+                return user.save(on: req.db)
             }
-            token = newToken
-            return token.save(on: req.db)
-        }
-        .flatMapThrowing {
-            NewSession(token: token.value, user: try user.asPublic())
-        }
+            .flatMap {
+                guard let newToken = try? user.createToken(source: .signup) else {
+                    return req.eventLoop.future(error: Abort(.internalServerError))
+                }
+                token = newToken
+                return token.save(on: req.db)
+            }
+            .flatMapThrowing {
+                NewSession(token: token.value, user: try user.asPublic())
+            }
     }
     
     fileprivate func login(req: Request) throws -> EventLoopFuture<NewSession> {

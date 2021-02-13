@@ -14,13 +14,14 @@ struct PlayerController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         // Unprotected routes
         let playersRoute = routes.grouped("players")
-        playersRoute.post("nrl", use: adminPostNrlPlayers)
 
         // User Auth protected routes
+        let tokenProtected = playersRoute.grouped(Token.authenticator())
         // TODO: Add user endpoints
 
         // Admin protected routes
-        // TODO: Update this once admin auth has been added
+        let adminProtected = playersRoute.grouped(AdminAuthMiddleware())
+        adminProtected.post("nrl", use: adminPostNrlPlayers)
     }
 
     // MARK: - Views
@@ -32,13 +33,4 @@ struct PlayerController: RouteCollection {
             .flatten(on: req.eventLoop)
             .map { HTTPStatus.created }
     }
-    
-    // MARK: - Internal functions
-//    private func checkIfPlayerExists(_ player: NRLPlayer, req: Request) -> EventLoopFuture<Bool> {
-//        NRLPlayer.query(on: req.db)
-//            .filter(\.$lastName == player.lastName)
-//            .filter(\.$firstName == player.firstName)
-//            .first()
-//            .map { $0 != nil }
-//    }
 }

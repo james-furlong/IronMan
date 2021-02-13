@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  CreateNRLValueStat.swift
 //  
 //
 //  Created by James Furlong on 2/2/21.
@@ -12,18 +12,20 @@ struct CreateNRLValueStat: Migration {
         database.eventLoop.flatten([
             database.schema(NRLValue.schema)
                 .id()
-                .field("round_id", .uuid, .required)
+                .field("date", .date, .required)
                 .field("starting_value", .double, .required)
                 .field("finishing_value", .double, .required)
                 .field("score", .double, .required)
-                .field("player_id", .uuid, .required)
-                .foreignKey("player_id", references: NRLPlayer.schema, .id, onDelete: .cascade, onUpdate: .noAction)
+                .field("match", .uuid, .required)
+                .foreignKey("match", references: NRLMatch.schema, .id, onDelete: .cascade)
+                .field("player", .uuid, .required)
+                .foreignKey("player", references: NRLPlayer.schema, .id, onDelete: .cascade)
                 .create(),
             database.schema(NRLStat.schema)
                 .id()
-                .field("value_id", .uuid, .required)
-                .foreignKey("value_id", references: NRLValue.schema, .id, onDelete: .cascade, onUpdate: .noAction)
-                .unique(on: "value_id")
+                .field("value", .uuid, .required)
+                .foreignKey("value", references: NRLValue.schema, .id, onDelete: .cascade)
+                .unique(on: "value")
                 .field("all_run_meters", .int, .required)
                 .field("all_runs", .int, .required)
                 .field("bomb_kicks", .int, .required)

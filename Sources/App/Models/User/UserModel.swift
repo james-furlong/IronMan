@@ -15,28 +15,36 @@ final class User: Model {
         let createdAt: Date?
         let updatedAt: Date?
     }
+    
+    enum AccessLevel: String, Codable, CaseIterable {
+        static var name: FieldKey { .accessLevel }
+        case User
+        case Admin
+    }
   
     static let schema = "users"
   
     @ID(key: "id") var id: UUID?
     @Field(key: "email") var email: String
     @Field(key: "password_hash") var passwordHash: String
+    @Enum(key: "access_level") var accessLevel: AccessLevel
     @Children(for: \.$user) var userDetails: [UserDetailsModel]
     @Timestamp(key: "created_at", on: .create) var createdAt: Date?
     @Timestamp(key: "updated_at", on: .update) var updatedAt: Date?
   
     init() {}
   
-    init(id: UUID? = nil, email: String, passwordHash: String) {
+    init(id: UUID? = nil, email: String, passwordHash: String, accessLevel: AccessLevel) {
         self.id = id
         self.email = email
         self.passwordHash = passwordHash
+        self.accessLevel = accessLevel
     }
 }
 
 extension User {
     static func create(from userSignup: UserSignup) throws -> User {
-        User(email: userSignup.email, passwordHash: try Bcrypt.hash(userSignup.password))
+        User(email: userSignup.email, passwordHash: try Bcrypt.hash(userSignup.password), accessLevel: .User)
     }
     
     func createToken(source: SessionSource) throws -> Token {
@@ -74,4 +82,8 @@ extension User: ModelAuthenticatable {
     func verify(password: String) throws -> Bool {
         try Bcrypt.verify(password, created: self.passwordHash)
     }
+}
+
+extension FieldKey {
+    static var accessLevel: Self { "accessLevel" }
 }

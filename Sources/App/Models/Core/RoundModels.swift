@@ -15,7 +15,7 @@ final class NRLRound: Model, Content {
         let roundTitle: String?
         let roundStartDateTime: Date?
         let roundEndDateTime: Date?
-        var matches: [NRLMatch]
+        var matches: [NRLMatch.Public]
     }
     
     static let schema: String = "core_nrl_round"
@@ -28,6 +28,14 @@ final class NRLRound: Model, Content {
     @Children(for: \.$round) var matches: [NRLMatch]
     
     init() { }
+    
+    init(from round: NRLRound.Public) {
+        self.id = round.id
+        self.round = round.round
+        self.roundTitle = round.roundTitle
+        self.roundStartDateTime = round.roundStartDateTime
+        self.roundEndDateTime = round.roundEndDateTime
+    }
     
     init(
         id: UUID? = nil,
