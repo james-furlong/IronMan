@@ -26,6 +26,7 @@ final class UserDetailsModel: Model {
     @Field(key: "first_name") var firstName: String
     @Field(key: "last_name") var lastName: String
     @Field(key: "dob") var dob: Date
+    @Children(for: \.$user) var teams: [NRLUserTeam]
     @Timestamp(key: "created_at", on: .create) var createdAt: Date?
     @Timestamp(key: "updated_at", on: .update) var updatedAt: Date?
     
@@ -43,6 +44,7 @@ final class UserDetailsModel: Model {
         self.firstName = firstName
         self.lastName = lastName
         self.dob = dob
+        self.teams = []
     }
 }
 
