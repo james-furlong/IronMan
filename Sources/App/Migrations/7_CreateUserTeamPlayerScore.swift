@@ -25,7 +25,7 @@ struct CreataUserTeamPlayerScore: Migration {
             .create()
             .flatMap { positionEnum in
                 database.eventLoop.flatten([
-                    database.schema(NRLUserTeam.schema)
+                    database.schema(NRLUserTeamModel.schema)
                         .id()
                         .field("user", .uuid, .required)
                         .foreignKey("user", references: UserDetailsModel.schema, .id)
@@ -38,7 +38,7 @@ struct CreataUserTeamPlayerScore: Migration {
                         .field("player", .uuid, .required)
                         .foreignKey("player", references: NRLPlayer.schema, .id)
                         .field("team", .uuid, .required)
-                        .foreignKey("team", references: NRLUserTeam.schema, .id)
+                        .foreignKey("team", references: NRLUserTeamModel.schema, .id)
                         .field("position", positionEnum, .required)
                         .create(),
                     database.schema(NRLUserScore.schema)
@@ -58,7 +58,7 @@ struct CreataUserTeamPlayerScore: Migration {
     
     func revert(on database: Database) -> EventLoopFuture<Void> {
         database.eventLoop.flatten([
-            database.schema(NRLUserTeam.schema).delete(),
+            database.schema(NRLUserTeamModel.schema).delete(),
             database.schema(NRLUserPlayer.schema).delete(),
             database.schema(NRLUserScore.schema).delete()
         ])

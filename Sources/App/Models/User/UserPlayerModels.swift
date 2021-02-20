@@ -20,7 +20,7 @@ final class NRLUserPlayer: Model, Content {
     
     @ID(key: "id") var id: UUID?
     @Parent(key: "player") var player: NRLPlayer
-    @Parent(key: "team") var team: NRLUserTeam
+    @Parent(key: "team") var team: NRLUserTeamModel
     @Enum(key: "position") var position: NRLPosition
     @Children(for: \.$userPlayer) var scores: [NRLUserScore]
     

@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  UserErrors.swift
 //  
 //
 //  Created by James Furlong on 5/1/21.

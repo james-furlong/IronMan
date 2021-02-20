@@ -11,12 +11,30 @@ import Vapor
 final class UserDetailsModel: Model {
     struct Public: Content {
         let id: UUID
-        let user: User
+        let user: User.Public
         let firstName: String
         let lastName: String
         let dob: Date
         let createdAt: Date?
         let updatedAt: Date?
+        
+        init(
+            id: UUID?,
+            user: User.Public,
+            firstName: String,
+            lastName: String,
+            dob: Date,
+            createdAt: Date?,
+            updatedAt: Date?
+        ) {
+            self.id = id!
+            self.user = user
+            self.firstName = firstName
+            self.lastName = lastName
+            self.dob = dob
+            self.createdAt = createdAt
+            self.updatedAt = updatedAt
+        }
     }
     
     static let schema = "userDetails"
@@ -26,7 +44,7 @@ final class UserDetailsModel: Model {
     @Field(key: "first_name") var firstName: String
     @Field(key: "last_name") var lastName: String
     @Field(key: "dob") var dob: Date
-    @Children(for: \.$user) var teams: [NRLUserTeam]
+    @Children(for: \.$user) var teams: [NRLUserTeamModel]
     @Timestamp(key: "created_at", on: .create) var createdAt: Date?
     @Timestamp(key: "updated_at", on: .update) var updatedAt: Date?
     
@@ -49,7 +67,7 @@ final class UserDetailsModel: Model {
 }
 
 extension UserDetailsModel {
-    static func create(from userDetails: UserDetails, user: User) throws -> UserDetailsModel {
+    static func create(from userDetails: UserDetailsRequest, user: User) throws -> UserDetailsModel {
         return UserDetailsModel(
             user: user,
             firstName: userDetails.firstName,

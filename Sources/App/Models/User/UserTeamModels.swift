@@ -8,16 +8,7 @@
 import Vapor
 import Fluent
 
-final class NRLUserTeam: Model, Content {
-    struct Public: ResponseEncodable {
-        let id: UUID
-        let userId: UUID?
-        let teamName: String
-        let teamColor: String
-        let teamLogo: Int
-        let players: [NRLUserPlayer]
-    }
-    
+final class NRLUserTeamModel: Model{
     static var schema: String = "user_nrl_team"
     
     @ID(key: "id") var id: UUID?
@@ -45,24 +36,46 @@ final class NRLUserTeam: Model, Content {
     }
 }
 
-final class NRLUserTeamResponse: Content {
-    let id: UUID
-    let teamName: String
-    let teamColor: String
-    let teamLogo: Int
-    let players: [NRLUserPlayer]
-    
-    init(
-        id: UUID,
-        teamName: String,
-        teamColor: String,
-        teamLogo: Int,
-        players: [NRLUserPlayer]
-    ) {
-        self.id = id
-        self.teamName = teamName
-        self.teamColor = teamColor
-        self.teamLogo = teamLogo
-        self.players = players
+extension NRLUserTeamModel {
+    static func create(from request: NRLUserTeamRequest, user: User) throws -> NRLUserTeamModel {
+        return NRLUserTeamModel(
+            userId: user.id!,
+            teamName: request.teamName,
+            teamColor: request.teamColor,
+            teamLogo: request.teamLogo
+        )
     }
 }
+
+//extension UserDetailsModel {
+//    static func create(from userDetails: UserDetailsRequest, user: User) throws -> UserDetailsModel {
+//        return UserDetailsModel(
+//            user: user,
+//            firstName: userDetails.firstName,
+//            lastName: userDetails.lastName,
+//            dob: userDetails.dob
+//        )
+//    }
+//}
+
+//final class NRLUserTeamResponse: Content {
+//    let id: UUID
+//    let teamName: String
+//    let teamColor: String
+//    let teamLogo: Int
+//    let players: [NRLUserPlayer]
+//
+//    init(
+//        id: UUID,
+//        teamName: String,
+//        teamColor: String,
+//        teamLogo: Int,
+//        players: [NRLUserPlayer]
+//    ) {
+//        self.id = id
+//        self.teamName = teamName
+//        self.teamColor = teamColor
+//        self.teamLogo = teamLogo
+//        self.players = players
+//    }
+//}

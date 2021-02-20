@@ -28,7 +28,7 @@ final class User: Model {
     @Field(key: "email") var email: String
     @Field(key: "password_hash") var passwordHash: String
     @Enum(key: "access_level") var accessLevel: AccessLevel
-    @Children(for: \.$user) var userDetails: [UserDetailsModel]
+    @Children(for: \.$user) var userDetails: [UserDetailsModel] // TODO: Change to a one-to-one relationship
     @Timestamp(key: "created_at", on: .create) var createdAt: Date?
     @Timestamp(key: "updated_at", on: .update) var updatedAt: Date?
   
@@ -43,7 +43,7 @@ final class User: Model {
 }
 
 extension User {
-    static func create(from userSignup: UserSignup) throws -> User {
+    static func create(from userSignup: UserRequest) throws -> User {
         User(email: userSignup.email, passwordHash: try Bcrypt.hash(userSignup.password), accessLevel: .User)
     }
     
@@ -58,7 +58,7 @@ extension User {
         )
     }
     
-    func createUserDetails(details: UserDetails, user: User) throws -> UserDetailsModel {
+    func createUserDetails(details: UserDetailsRequest, user: User) throws -> UserDetailsModel {
         return try UserDetailsModel(
             user: user,
             firstName: details.firstName,
