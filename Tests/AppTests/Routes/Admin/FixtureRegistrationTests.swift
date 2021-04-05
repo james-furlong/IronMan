@@ -10,6 +10,12 @@ final class FixtureRegistrationTests: XCTestCase {
         try app.autoRevert().wait()
         try app.autoMigrate().wait()
         
+        let user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .Admin)
+        let _ = try user.save(on: app.db).wait()
+        
+        let token: Token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+        let tokenValue = token.value
         
         let match = NRLMatch.Public(
             id: UUID(),
@@ -38,6 +44,7 @@ final class FixtureRegistrationTests: XCTestCase {
         let request = NRLFixtureRegister(rounds: [round])
         
         try app.test(.POST, "/fixture/nrl/", beforeRequest: { req in
+            req.headers.bearerAuthorization = .init(token: tokenValue)
             try req.content.encode(request)
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .created)

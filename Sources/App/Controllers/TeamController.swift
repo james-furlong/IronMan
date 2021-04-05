@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  TeamController.swift
 //  
 //
 //  Created by James Furlong on 14/2/21.
@@ -11,6 +11,7 @@ import Fluent
 struct TeamController: RouteCollection {
     
     // MARK: - Routes
+    
     func boot(routes: RoutesBuilder) throws {
         // Unprotected routes
         let teamRoute = routes.grouped("team")
@@ -23,7 +24,6 @@ struct TeamController: RouteCollection {
         
         tokenProtected.get("nrl", ":team_id", use: userTeamGet)
         tokenProtected.patch("nrl", ":team_id", use: userTeamPatch)
-        // TODO: Add user endpoints
 
         // Admin protected routes
         let adminProtected = teamRoute.grouped(AdminAuthMiddleware())
@@ -93,6 +93,7 @@ struct TeamController: RouteCollection {
     }
     
     // MARK: - Admin routes User ID Routes
+    
     fileprivate func adminTeamGetUser(req: Request) throws -> EventLoopFuture<Response> {
         let _ = try req.auth.require(User.self)
         let userId = req.parameters.get("user_id", as: UUID.self)

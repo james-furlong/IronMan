@@ -9,6 +9,15 @@ import Vapor
 import Fluent
 
 final class NRLUserTeamModel: Model{
+    struct Public: Content {
+        let id: UUID
+        let userId: UUID
+        let team_name: String
+        let team_color: String
+        let team_logo: Int
+        let players: [NRLUserPlayer.Public]
+    }
+    
     static var schema: String = "user_nrl_team"
     
     @ID(key: "id") var id: UUID?

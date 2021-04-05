@@ -27,6 +27,6 @@ struct NRLUserTeamResponse: Content {
         self.teamName = userTeam.teamName
         self.teamColor = userTeam.teamColor
         self.teamLogo = userTeam.teamLogo
-        self.players = try userTeam.players.map { try NRLUserPlayerResponse(from: $0, on: req) }
+        self.players = userTeam.players.map { NRLUserPlayerResponse(from: $0) }
     }
 }

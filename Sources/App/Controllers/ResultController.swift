@@ -22,7 +22,6 @@ struct ResultController: RouteCollection {
         // Admin protected routes
         let adminProtected = resultsRoute.grouped(AdminAuthMiddleware())
         adminProtected.post("nrl", use: adminPostNrlResults)
-        // TODO: Update this once admin auth has been added
     }
 
     // MARK: - Views

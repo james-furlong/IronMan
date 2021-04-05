@@ -9,11 +9,12 @@ import Vapor
 import Fluent
 
 final class NRLUserPlayer: Model, Content {
-    struct Public {
+    struct Public: Content {
         let id: UUID
-        let player: NRLPlayer
+        let playerId: UUID
+        let name: String
         let position: NRLPosition
-        let scores: [NRLUserScore]
+        let scores: [NRLUserScore.Public]
     }
     
     static var schema: String = "user_nrl_player"

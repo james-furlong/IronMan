@@ -27,6 +27,9 @@ struct CreateUsers: Migration {
     }
 
     func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema(User.schema).delete()
+        database.schema(User.schema).delete().flatMap { _ in
+                database.enum(User.AccessLevel.name.description).delete()
+            }
+
     }
 }

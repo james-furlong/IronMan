@@ -9,9 +9,9 @@ import Vapor
 import Fluent
 
 final class NRLUserScore: Model, Content {
-    struct Public {
+    struct Public: Content {
         let id: UUID
-        let value: NRLValue
+        let valueId: UUID
         let position: NRLPosition
         let modifiedScore: Double
         let unmodifiedScore: Double

@@ -12,6 +12,7 @@ enum UserError {
     case userDetailRegistered
     case noUserDetailsRegistered
     case insufficientPrivileges
+    case userNotFound
 }
 
 extension UserError: AbortError {
@@ -24,7 +25,8 @@ extension UserError: AbortError {
             case .usernameTaken: return .conflict
             case .userDetailRegistered: return .conflict
             case .noUserDetailsRegistered: return .conflict
-            case .insufficientPrivileges: return .conflict
+            case .insufficientPrivileges: return .unauthorized
+            case .userNotFound: return .notFound
         }
     }
 
@@ -34,6 +36,7 @@ extension UserError: AbortError {
             case .userDetailRegistered: return "User details already registered"
             case .noUserDetailsRegistered: return "No user details have been registered"
             case .insufficientPrivileges: return "Insufficient privileges"
+            case .userNotFound: return "User not found"
         }
     }
 }
