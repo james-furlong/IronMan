@@ -1,9 +1,29 @@
 @testable import App
 import XCTVapor
 
-final class ResultsRegistrationTests: XCTestCase {
+final class ResultsPostTests: XCTestCase {
+    
+    private var user: User!
+    private var token: Token!
+    
+    func setupAdminUser(_ app: Application) throws {
+        user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .Admin)
+        let _ = try user.save(on: app.db).wait()
+        
+        token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+    }
+    
+    func setupRegularUser(_ app: Application) throws {
+        user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .User)
+        let _ = try user.save(on: app.db).wait()
+        
+        token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+    }
+    
     let app = Application(.testing)
-    let stat = NRLStat.Public(id: nil, playerReferenceId: "5555", allRunMetres: 0, allRuns: 0, bombKicks: 0, crossFieldKicks: 0, conversions: 0, conversionAttempts: 0, dummyHalfRuns: 0, dummyHalfRunMetres: 0, dummyPasses: 0, errors: 0, fantasyPointsTotal: 0, fieldGoals: 0, forcedDropOutKicks: 0, fortyTwentyKicks: 0, goals: 0, goalConversionRate: 0, grubberKicks: 0, handlingErrors: 0, hitUps: 0, hitUpRunMetres: 0, ineffectiveTackles: 0, intercepts: 0, kicks: 0, kicksDead: 0, kicksDefused: 0, kickMetres: 0, kickReturnMetres: 0, lineBreakAssists: 0, lineBreaks: 0, lineEngagedRuns: 0, minutesPlayed: 0, missedTackles: 0, offloads: 0, oneOnOneLost: 0, oneOnOneSteal: 0, onReport: 0, passesToRunRatio: 0, passes: 0, playTheBallTotal: 0, playTheBallAverageSpeed: 0, penalties: 0, points: 0, penaltyGoals: 0, postContactMetres: 0, receipts: 0, ruckInfringements: 0, sendOffs: 0, sinBins: 0, stintOne: 0, tackleBreaks: 0, tackleEfficiency: 0, tacklesMade: 0, tries: 0, tryAssists: 0, twentyFortyKicks: 0)
+    let stat = NRLStat.Public.emptyStats()
     let round = NRLRound(
         round: 1,
         roundTitle: "Round 1",
@@ -57,6 +77,8 @@ final class ResultsRegistrationTests: XCTestCase {
             stats: [stat]
         )
         
+        try setupAdminUser(app)
+        
         try round.save(on: app.db).wait()
         let match = NRLMatch(
             referenceId: "1234567890",
@@ -78,6 +100,7 @@ final class ResultsRegistrationTests: XCTestCase {
         let request = NRLResultsRegister(results: [result])
         
         try app.test(.POST, "/result/nrl/", beforeRequest: { req in
+            req.headers.bearerAuthorization = .init(token: token.value)
             try req.content.encode(request)
         }, afterResponse: { response in
             NRLResult.query(on: app.db).first().unwrap(orError: Abort(.notFound)).whenSuccess { resultResponse in

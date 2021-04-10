@@ -1,7 +1,27 @@
 @testable import App
 import XCTVapor
 
-final class PlayerRegistrationTests: XCTestCase {
+final class PlayerPostTests: XCTestCase {
+    
+    private var user: User!
+    private var token: Token!
+    
+    func setupAdminUser(_ app: Application) throws {
+        user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .Admin)
+        let _ = try user.save(on: app.db).wait()
+        
+        token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+    }
+    
+    func setupRegularUser(_ app: Application) throws {
+        user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .User)
+        let _ = try user.save(on: app.db).wait()
+        
+        token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+    }
+    
     func testAdminNrlPlayerRegistration() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -10,14 +30,8 @@ final class PlayerRegistrationTests: XCTestCase {
         try app.autoRevert().wait()
         try app.autoMigrate().wait()
         
-        let user = User(
-            email: "admin@user.com",
-            passwordHash: "",
-            accessLevel: .Admin
-        )
-        try user.save(on: app.db).wait()
-        let token = try user.createToken(source: .login)
-        try token.save(on: app.db).wait()
+        try setupAdminUser(app)
+        let tokenValue = token.value
 
         let player = NRLPlayer(
             firstName: "TestFirstName",
@@ -33,7 +47,7 @@ final class PlayerRegistrationTests: XCTestCase {
         
         try app.test(.POST, "/players/nrl/admin/", beforeRequest: { req in
             try req.content.encode(request)
-            req.headers.bearerAuthorization = BearerAuthorization(token: token.value)
+            req.headers.bearerAuthorization = .init(token: tokenValue)
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .created)
             NRLPlayer.query(on: app.db).first().unwrap(or: Abort(.notFound)).whenComplete{ savedPlayer in

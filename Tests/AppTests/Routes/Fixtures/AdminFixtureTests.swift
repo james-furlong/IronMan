@@ -1,7 +1,27 @@
 @testable import App
 import XCTVapor
 
-final class FixtureRegistrationTests: XCTestCase {
+final class FixturePostTests: XCTestCase {
+    
+    private var user: User!
+    private var token: Token!
+    
+    func setupAdminUser(_ app: Application) throws {
+        user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .Admin)
+        let _ = try user.save(on: app.db).wait()
+        
+        token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+    }
+    
+    func setupRegularUser(_ app: Application) throws {
+        user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .User)
+        let _ = try user.save(on: app.db).wait()
+        
+        token = try user.createToken(source: .login)
+        try token.save(on: app.db).wait()
+    }
+    
     func testAdminNrlPlayerRegistration() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
@@ -10,12 +30,7 @@ final class FixtureRegistrationTests: XCTestCase {
         try app.autoRevert().wait()
         try app.autoMigrate().wait()
         
-        let user = User(email: "test@test.com", passwordHash: "foo", accessLevel: .Admin)
-        let _ = try user.save(on: app.db).wait()
-        
-        let token: Token = try user.createToken(source: .login)
-        try token.save(on: app.db).wait()
-        let tokenValue = token.value
+        try setupAdminUser(app)
         
         let match = NRLMatch.Public(
             id: UUID(),
@@ -44,7 +59,7 @@ final class FixtureRegistrationTests: XCTestCase {
         let request = NRLFixtureRegister(rounds: [round])
         
         try app.test(.POST, "/fixture/nrl/", beforeRequest: { req in
-            req.headers.bearerAuthorization = .init(token: tokenValue)
+            req.headers.bearerAuthorization = .init(token: token.value)
             try req.content.encode(request)
         }, afterResponse: { response in
             XCTAssertEqual(response.status, .created)
